@@ -1,6 +1,6 @@
 # Zobbo
 
-A fun online competitive card game to play with your friends.
+A fun online competitive card game to play with your friends.\
 Mainly just making this to play with my S/O so we can play when we're long distance again </3
 
 **Aim of the Game:**\
