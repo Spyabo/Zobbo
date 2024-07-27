@@ -8,7 +8,8 @@ Have the lowest total points score left in your card roster until someone calls 
 \
 **How to Win?**
 
-Before you take your next card on your turn: Call Zobbo when you think you have less points than your opponent\
+Before you take your next card on your turn:\
+**Call Zobbo when you think you have less points than your opponent**\
 Finish your turn\
 Opponent finishes their turn \
 Flip all cards and count the cards\
