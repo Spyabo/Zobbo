@@ -1,0 +1,40 @@
+# Fly.io configuration for Zobbo
+# Rename the app below or deploy with: fly deploy -a <your-app-name>
+app = "zobbo"
+primary_region = "lhr"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  RUST_LOG = "info"
+
+[experimental]
+  auto_stop_machines = true
+  auto_start_machines = true
+
+[[services]]
+  internal_port = 8080
+  protocol = "tcp"
+  processes = ["app"]
+  
+  [services.concurrency]
+    type = "requests"
+    hard_limit = 50
+    soft_limit = 40
+
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]
+
+  [[services.http_checks]]
+    interval = "10s"
+    timeout = "2s"
+    grace_period = "5s"
+    method = "get"
+    path = "/healthz"
+    protocol = "http"

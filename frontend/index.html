@@ -1,13 +1,183 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React + TS</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Zobbo — Play with a Friend</title>
+    <meta name="description" content="Zobbo — a fast, competitive 1v1 online card game." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd',
+                400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a'
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <script type="importmap">
+      {
+        "imports": {
+          "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js",
+          "pinia": "https://unpkg.com/pinia@2/dist/pinia.esm-browser.js"
+        }
+      }
+    </script>
+    <style>
+      :root { color-scheme: dark; }
+      html, body { height: 100%; font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
+      .card { @apply rounded-2xl border border-white/10 bg-white/5 backdrop-blur shadow-lg shadow-black/30; }
+      .btn { @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 font-semibold transition active:scale-[0.99] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500; }
+      .btn-primary { @apply bg-brand-600 hover:bg-brand-500 active:bg-brand-700 text-white; }
+      .btn-secondary { @apply bg-white/10 hover:bg-white/15 active:bg-white/20 text-white; }
+      .input { @apply w-full rounded-xl border border-white/10 bg-white/5 px-3 py-3 outline-none focus:ring-2 focus:ring-brand-500; }
+      .label { @apply text-sm text-white/70; }
+      .pill { @apply inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs; }
+      /* Hide legacy static sections when Vue app is present */
+      #landing, #join, #lobby, #game { display: none !important; }
+    </style>
   </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+  <body class="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100">
+    <header class="sticky top-0 z-10 border-b border-white/10 bg-black/30 backdrop-blur">
+      <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+        <a class="flex items-center gap-3" href="/">
+          <img src="/favicon.svg" alt="Z" class="h-7 w-7" />
+          <span class="text-lg font-bold tracking-tight">Zobbo</span>
+        </a>
+        <nav class="flex items-center gap-2 text-sm text-white/70">
+          <a href="https://" target="_blank" class="hover:text-white hidden">Rules</a>
+          <a href="https://" target="_blank" class="hover:text-white hidden">About</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="mx-auto max-w-4xl px-3 sm:px-4 py-6 sm:py-10">
+      <!-- Landing -->
+      <section id="landing" class="grid gap-4 sm:gap-6 md:grid-cols-2">
+        <div class="card p-6">
+          <h1 class="text-3xl font-extrabold">Play Zobbo online</h1>
+          <p class="mt-2 text-white/70">Fast, competitive 1v1 card game. Create a room and share the link with a friend.</p>
+          <div class="mt-6 grid gap-4">
+            <div>
+              <label class="label" for="landing-name">Your name</label>
+              <input id="landing-name" class="input" placeholder="e.g. Alex" />
+            </div>
+            <div>
+              <label class="label">Mode</label>
+              <div class="mt-1 flex gap-2">
+                <button id="mode-battle" class="btn btn-secondary" data-mode="battle">Zobbo Battle</button>
+                <button id="mode-sudden" class="btn btn-secondary" data-mode="sudden">Sudden Death</button>
+              </div>
+              <div id="rounds-wrap" class="mt-3 flex items-center gap-3">
+                <label class="label" for="landing-rounds">Rounds</label>
+                <input id="landing-rounds" type="number" min="1" max="9" value="3" class="input w-24" />
+              </div>
+            </div>
+            <div class="flex gap-3">
+              <button id="btn-create" class="btn btn-primary">Create Room</button>
+              <button id="btn-join-from-landing" class="btn btn-secondary">Join by Link/ID</button>
+            </div>
+          </div>
+        </div>
+        <div class="card p-6">
+          <h2 class="text-xl font-semibold">Join a room</h2>
+          <p class="mt-2 text-white/70">Paste a shared link or enter a room ID.</p>
+          <div class="mt-4 grid gap-3">
+            <input id="landing-room" class="input" placeholder="https://host/room-id or UUID" />
+            <input id="landing-name-join" class="input" placeholder="Your name" />
+            <button id="btn-join-go" class="btn btn-primary">Join</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Join view -->
+      <section id="join" class="card mt-8 hidden p-6">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <div class="label">Room</div>
+            <div id="join-room-id" class="font-mono text-sm"></div>
+          </div>
+          <div>
+            <button id="btn-copy-invite-join" class="btn btn-secondary">Copy Invite Link</button>
+          </div>
+        </div>
+        <div class="mt-6 grid gap-3 md:grid-cols-[1fr_auto]">
+          <input id="join-name" class="input" placeholder="Your name" />
+          <button id="btn-join" class="btn btn-primary">Join Room</button>
+        </div>
+      </section>
+
+      <!-- Lobby view -->
+      <section id="lobby" class="card mt-6 sm:mt-8 hidden p-6">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <span class="pill"><span class="h-2 w-2 rounded-full bg-emerald-400"></span> Room ready</span>
+            <button id="btn-copy-invite" class="btn btn-secondary">Copy Invite Link</button>
+          </div>
+          <div class="text-sm text-white/70">Share the link and wait for your friend to join.</div>
+        </div>
+        <div class="mt-6 grid gap-4 md:grid-cols-2">
+          <div class="rounded-lg border border-white/10 p-4">
+            <div class="label">Players</div>
+            <ul id="players" class="mt-2 space-y-2"></ul>
+          </div>
+          <div class="rounded-lg border border-white/10 p-4">
+            <div class="label">Status</div>
+            <div id="lobby-status" class="mt-2 text-white/80">Waiting…</div>
+            <div class="mt-4">
+              <button id="btn-ready" class="btn btn-primary">I'm Ready</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Game view (placeholder for now) -->
+      <section id="game" class="card mt-6 sm:mt-8 hidden p-6">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xl font-semibold">Game</h2>
+          <div id="turn-indicator" class="pill">Waiting for start…</div>
+        </div>
+        <div class="mt-6 grid gap-4 sm:gap-6 md:grid-cols-2">
+          <div>
+            <div class="label mb-2">You</div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <div class="h-28 rounded-lg border border-white/10 bg-white/5"></div>
+              <div class="h-28 rounded-lg border border-white/10 bg-white/5"></div>
+              <div class="h-28 rounded-lg border border-white/10 bg-white/5"></div>
+              <div class="h-28 rounded-lg border border-white/10 bg-white/5"></div>
+              <div class="h-28 rounded-lg border border-white/10 bg-white/5"></div>
+              <div class="h-28 rounded-lg border border-white/10 bg-white/5"></div>
+            </div>
+          </div>
+          <div>
+            <div class="label mb-2">Opponent</div>
+            <div class="grid grid-cols-3 gap-3">
+              <div class="h-28 rounded-lg border border-white/10 bg-white/5"></div>
+              <div class="h-28 rounded-lg border border-white/10 bg-white/5"></div>
+              <div class="h-28 rounded-lg border border-white/10 bg-white/5"></div>
+              <div class="h-28 rounded-lg border border-white/10 bg-white/5"></div>
+              <div class="h-28 rounded-lg border border-white/10 bg-white/5"></div>
+              <div class="h-28 rounded-lg border border-white/10 bg-white/5"></div>
+            </div>
+          </div>
+        </div>
+        <p class="mt-6 text-sm text-white/60">Gameplay UI is scaffolded. Server-authoritative logic will reveal only your permitted cards; opponent cards remain hidden to prevent cheating.</p>
+      </section>
+
+      <div id="toast" class="fixed bottom-4 right-4 hidden rounded-lg bg-black/80 px-4 py-2 text-sm shadow-lg"></div>
+    </main>
+
+    <!-- Vue mount target (hidden, using Pinia only for state) -->
+    <div id="app"></div>
+    <script type="module" src="/main.js"></script>
   </body>
 </html>

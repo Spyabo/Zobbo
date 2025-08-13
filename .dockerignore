@@ -1,0 +1,23 @@
+# Build artifacts
+**/target
+**/*.rs.bk
+
+# Git
+.git
+.gitignore
+
+# Node / Frontend
+**/node_modules
+**/.cache
+**/dist
+
+# OS / Misc
+**/.DS_Store
+**/*.log
+
+# Fly.io
+.fly
+
+# Docker
+Dockerfile
+.dockerignore
