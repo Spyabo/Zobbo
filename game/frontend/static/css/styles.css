@@ -1,0 +1,4 @@
+/* Minimal placeholder styles for scaffold */
+:root { color-scheme: light dark; }
+body { font-family: system-ui, sans-serif; margin: 0; }
+.container { max-width: 960px; margin: 0 auto; padding: 1rem; }

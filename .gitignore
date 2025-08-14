@@ -1,5 +1,5 @@
 # Backend
-backend/target
+game/backend/target
 
 # Frontend
-frontend/node_modules
+game/frontend/node_modules

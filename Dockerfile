@@ -1,32 +1,34 @@
-# syntax=docker/dockerfile:1
+# Multi-stage Dockerfile for Zobbo (Rust + Axum)
 
-# --- Builder stage ---
-FROM rust:1.79 as builder
+# --- Builder ---
+FROM rust:1-bookworm AS builder
 WORKDIR /app
 
-# Cache dependencies
-COPY backend/Cargo.toml backend/Cargo.lock /app/backend/
-RUN mkdir -p /app/backend/src \
-    && echo "fn main() {}" > /app/backend/src/main.rs \
-    && cd /app/backend \
-    && cargo build --release \
-    && rm -f /app/backend/src/main.rs
+# Copy the whole game directory so Askama can resolve templates at compile time
+COPY game ./game
 
-# Build application
-COPY . /app
-RUN cd /app/backend && cargo build --release
+# Build deps for any crates that might need system libs (keep minimal)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    pkg-config libssl-dev ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 
-# --- Runtime stage ---
-FROM debian:bookworm-slim
-RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+WORKDIR /app/game/backend
+RUN cargo build --release
 
-# App layout: keep working directory at backend so ../frontend resolves
-WORKDIR /app/backend
-COPY --from=builder /app/backend/target/release/zobbo-backend /usr/local/bin/zobbo-backend
-COPY --from=builder /app/frontend /app/frontend
+# --- Runtime ---
+FROM debian:bookworm-slim AS runtime
+RUN useradd -m -u 10001 appuser
+WORKDIR /app
 
-ENV RUST_LOG=info
+# Copy the built binary
+COPY --from=builder /app/game/backend/target/release/zobbo /app/zobbo
+
+# Copy static assets used by the server at runtime
+COPY --from=builder /app/game/frontend/static /app/game/frontend/static
+
+ENV PORT=8080 \
+    RUST_LOG=info
 EXPOSE 8080
+USER appuser
 
-CMD ["zobbo-backend"]
+CMD ["/app/zobbo"]

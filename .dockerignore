@@ -1,23 +1,10 @@
-# Build artifacts
-**/target
-**/*.rs.bk
-
-# Git
+# Reduce Docker build context
 .git
 .gitignore
-
-# Node / Frontend
-**/node_modules
-**/.cache
-**/dist
-
-# OS / Misc
+**/target
+**/.idea
+**/.vscode
 **/.DS_Store
-**/*.log
 
-# Fly.io
-.fly
-
-# Docker
-Dockerfile
-.dockerignore
+# Node artifacts if any appear later
+**/node_modules

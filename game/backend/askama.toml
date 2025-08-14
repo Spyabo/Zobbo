@@ -1,0 +1,4 @@
+# Askama configuration for backend crate
+# Use templates from the frontend directory
+[general]
+dirs = ["../frontend/templates"]

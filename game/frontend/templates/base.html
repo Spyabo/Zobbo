@@ -1,0 +1,21 @@
+<!-- Base layout: includes HTMX, htmx-ws, Alpine via CDN. Content blocks are placeholders for now. -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zobbo</title>
+  <link rel="stylesheet" href="/static/css/styles.css" />
+  <!-- HTMX + htmx-ws + Alpine.js (CDN) -->
+  <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
+  <script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/ws.js" defer></script>
+  <script src="https://unpkg.com/alpinejs@3.x.x" defer></script>
+</head>
+<body>
+  <div id="app">
+    <!-- content -->
+    {% block content %}{% endblock %}
+  </div>
+  <script src="/static/js/app.js" defer></script>
+</body>
+</html>

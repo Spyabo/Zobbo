@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<main id="room" class="container" hx-ext="ws">
+  <h1>Room {{ room_id }}</h1>
+  {% if has_invite %}
+  <div class="invite">
+    <p>Share this token with your opponent:</p>
+    <code>{{ invite_token }}</code>
+    <p>Direct view link:</p>
+    <code>/rooms/{{ room_id }}/view?token={{ invite_token }}</code>
+  </div>
+  {% endif %}
+  <!-- htmx-ws binding target element placeholder -->
+  <div id="room-state" hx-ws="connect:/ws"></div>
+</main>
+{% endblock %}
