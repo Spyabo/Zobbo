@@ -11,6 +11,6 @@
   </div>
   {% endif %}
   <!-- htmx-ws binding target element placeholder -->
-  <div id="room-state" hx-ws="connect:/ws"></div>
+  <div id="room-state" hx-ws="connect:/ws?room_id={{ room_id }}&token={{ viewer_token }}"></div>
 </main>
 {% endblock %}

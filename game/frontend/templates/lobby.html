@@ -2,10 +2,25 @@
 {% block content %}
 <main class="container">
   <h1>Zobbo Lobby</h1>
-  <!-- Placeholders; forms will be wired later via HTMX -->
-  <section id="create-join">
-    <div>Create Room</div>
-    <div>Join Room</div>
+  <section id="create-join" class="grid">
+    <div class="card">
+      <h2>Create Room</h2>
+      <form action="/rooms" method="post">
+        <button type="submit">Create</button>
+      </form>
+    </div>
+    <div class="card">
+      <h2>Join Room</h2>
+      <form id="join-form" method="post" onsubmit="this.action='/rooms/'+this.room_id.value+'/join'">
+        <label>Room ID
+          <input type="text" name="room_id" required placeholder="e.g. 01HXYZABCD" />
+        </label>
+        <label>Token
+          <input type="text" name="token" required placeholder="invite or your token" />
+        </label>
+        <button type="submit">Join</button>
+      </form>
+    </div>
   </section>
 </main>
 {% endblock %}

@@ -4,12 +4,13 @@ use askama::Template;
 use axum::{extract::{Path, Query, State}, response::{IntoResponse, Redirect}, Form};
 use serde::Deserialize;
 use axum::http::StatusCode;
+use std::sync::Arc;
 
 use crate::room::manager::{RoomError, RoomManager};
 
 #[derive(Clone)]
 pub struct AppState {
-    pub rooms: RoomManager,
+    pub rooms: Arc<RoomManager>,
 }
 
 #[derive(Template)]
@@ -18,10 +19,12 @@ struct RoomTemplate {
     room_id: String,
     has_invite: bool,
     invite_token: String,
+    viewer_token: String,
 }
 
 pub async fn create_room(State(state): State<AppState>) -> impl IntoResponse {
     let created = state.rooms.create_room();
+    tracing::debug!(room_id = %created.id, creator = %created.creator_token, invite = %created.invite_token, "created room");
     let redirect_to = format!("/rooms/{}/view?token={}", created.id, created.creator_token);
     Redirect::to(&redirect_to)
 }
@@ -54,6 +57,7 @@ pub async fn view_room(
 ) -> impl IntoResponse {
     // Validate visibility: room exists and token is one of the room's tokens
     let ok = state.rooms.has_token(&id, &token);
+    tracing::debug!(room_id = %id, token = %token, ok = ok, "view_room validate");
     if !ok {
         return (StatusCode::UNAUTHORIZED, "invalid room or token").into_response();
     }
@@ -63,5 +67,5 @@ pub async fn view_room(
         Some(t) => (true, t),
         None => (false, String::new()),
     };
-    RoomTemplate { room_id: id, has_invite, invite_token }.into_response()
+    RoomTemplate { room_id: id, has_invite, invite_token, viewer_token: token }.into_response()
 }
